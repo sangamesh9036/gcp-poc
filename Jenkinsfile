@@ -23,7 +23,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/sangamesh9036/gcp-poc.git'
+                git branch: 'main', url: 'https://github.com/sangamesh9036/gcp-poc.git', credentialsId: 'github-pat-credentials'
             }
         }
         stage('Build Docker Image') {
