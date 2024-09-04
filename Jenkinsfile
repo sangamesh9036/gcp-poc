@@ -8,7 +8,8 @@ pipeline {
             spec:
               containers:
               - name: jenkins-agent
-                image: devsanga/jenkins-agent-with-docker:latest
+                image: jenkins/inbound-agent
+                args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
                 tty: true
             """
         }
@@ -21,13 +22,11 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/sangamesh9036/gcp-poc.git', credentialsId: 'github-pat-credentials'
-            }
-        }
-        stage('Build Docker Image') {
+@@ -10,11 +29,21 @@ pipeline {
             steps {
                 script {
                     def imageTag = "build-${env.BUILD_ID}".toLowerCase().replaceAll("[^a-z0-9-]", "")
+                    echo "Building Docker Image with tag: ${imageTag}"
                     def customImage = docker.build("devsanga/my-app:${imageTag}")
                     customImage.push()
                 }
