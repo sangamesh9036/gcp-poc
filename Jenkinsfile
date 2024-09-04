@@ -8,9 +8,17 @@ pipeline {
             spec:
               containers:
               - name: jenkins-agent
-                image: jenkins/inbound-agent
-                args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
+                image: docker:20.10.7-dind
+                securityContext:
+                  privileged: true
+                volumeMounts:
+                - name: docker-socket
+                  mountPath: /var/run/docker.sock
                 tty: true
+            volumes:
+            - name: docker-socket
+              hostPath:
+                path: /var/run/docker.sock
             """
         }
     }
