@@ -8,7 +8,7 @@ pipeline {
             spec:
               containers:
               - name: jenkins-agent
-                image: devsanga/jenkins-agent-with-docker
+                image: devsanga/jenkins-agent-with-docker:latest
                 tty: true
             """
         }
