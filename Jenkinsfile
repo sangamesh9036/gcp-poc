@@ -17,7 +17,7 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
         REGISTRY_URL = 'https://index.docker.io/v1/'
-        DOCKER_IMAGE = 'devsanga/my-app:build-${env.BUILD_ID}'  // Update this line
+        DOCKER_IMAGE = 'devsanga/my-app:build-${env.BUILD_ID.toLowerCase().replaceAll("[^a-z0-9-]", "")}' // Update this line
         KUBECONFIG_CREDENTIALS_ID = 'kubeconfig'
     }
     stages {
