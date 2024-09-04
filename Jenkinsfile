@@ -8,17 +8,8 @@ pipeline {
             spec:
               containers:
               - name: jenkins-agent
-                image: docker:20.10.7-dind
-                securityContext:
-                  privileged: true
-                volumeMounts:
-                - name: docker-socket
-                  mountPath: /var/run/docker.sock
+                image: devsanga/jenkins-agent-with-docker
                 tty: true
-              volumes:
-              - name: docker-socket
-                hostPath:
-                  path: /var/run/docker.sock
             """
         }
     }
