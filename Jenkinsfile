@@ -8,18 +8,27 @@ pipeline {
             spec:
               containers:
               - name: jenkins-agent
-                image: jenkins/inbound-agent
+                image: devsanga/jenkins-docker_new:latest  # custom Jenkins agent image
                 args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
                 tty: true
+                volumeMounts:
+                - name: docker-socket
+                  mountPath: /var/run/docker.sock
+              volumes:
+              - name: docker-socket
+                hostPath:
+                  path: /var/run/docker.sock
             """
         }
     }
+
     environment {
-        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'  # Docker Hub credentials
         REGISTRY_URL = 'https://index.docker.io/v1/'
-        DOCKER_IMAGE = 'my-app:${env.BUILD_ID}'
-        KUBECONFIG_CREDENTIALS_ID = 'kubeconfig'
+        DOCKER_IMAGE = 'devsanga/my-app:${env.BUILD_ID}'  # Application Docker image
+        KUBECONFIG_CREDENTIALS_ID = 'kubeconfig'          # Kubernetes Kubeconfig credentials ID
     }
+
     stages {
         stage('Clone Repository') {
             steps {
@@ -29,7 +38,11 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build(DOCKER_IMAGE).push()
+                    docker.withRegistry("${REGISTRY_URL}", "${DOCKER_CREDENTIALS_ID}") {
+                        def app = docker.build("${DOCKER_IMAGE}")
+                        app.push()  // Push the image with build ID tag
+                        app.push('latest')  // Also push with the 'latest' tag
+                    }
                 }
             }
         }
