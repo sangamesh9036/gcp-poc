@@ -17,20 +17,19 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
         REGISTRY_URL = 'https://index.docker.io/v1/'
+        DOCKER_IMAGE = 'my-app:${env.BUILD_ID}'
         KUBECONFIG_CREDENTIALS_ID = 'kubeconfig'
     }
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/sangamesh9036/gcp-poc.git', credentialsId: 'github-pat-credentials'
+                git url: 'https://github.com/sangamesh9036/gcp-poc.git'
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    def imageTag = "build-${env.BUILD_ID}".toLowerCase().replaceAll("[^a-z0-9-]", "")
-                    def customImage = docker.build("devsanga/my-app:${imageTag}")
-                    customImage.push()
+                    docker.build(DOCKER_IMAGE).push()
                 }
             }
         }
