@@ -16,4 +16,3 @@ EXPOSE 8080
 
 # Define the command to run the app
 CMD ["node", "server.js"]
-
