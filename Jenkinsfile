@@ -1,16 +1,25 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom 'jenkins-agent'  // Use inheritFrom instead of label
+            label 'jenkins-agent'
             yaml """
             apiVersion: v1
             kind: Pod
             spec:
               containers:
-              - name: jnlp
-                image: jenkins/inbound-agent:latest
+              - name: jenkins-agent
+                image: ubuntu  // Change the image to something like 'ubuntu' or 'busybox'
+                command:
+                - cat
                 tty: true
             """
+        }
+    }
+    stages {
+        stage('Test') {
+            steps {
+                echo 'Testing the pod with a different image...'
+            }
         }
     }
 
