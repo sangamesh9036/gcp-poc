@@ -2,24 +2,28 @@ pipeline {
     agent {
         kubernetes {
             label 'jenkins-agent'
-            inheritFrom 'default'
+            defaultContainer 'jnlp'  // Use the default Jenkins container
             yaml """
             apiVersion: v1
             kind: Pod
             spec:
-              restartPolicy: Never
               containers:
-              - name: jenkins-agent
-                image: jenkins/inbound-agent:latest  // custom Jenkins agent image
+              - name: jnlp
+                image: jenkins/inbound-agent:latest
                 args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
                 tty: true
-                volumeMounts:
-                - name: docker-socket
-                  mountPath: /var/run/docker.sock
+                resources:
+                  requests:
+                    memory: "512Mi"
+                    cpu: "500m"
+                  limits:
+                    memory: "1024Mi"
+                    cpu: "1"
               volumes:
               - name: docker-socket
                 hostPath:
                   path: /var/run/docker.sock
+                  type: File
             """
         }
     }
