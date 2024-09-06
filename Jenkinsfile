@@ -2,6 +2,7 @@ pipeline {
     agent {
         kubernetes {
             label 'jenkins-agent'
+            inheritFrom 'default'
             yaml """
             apiVersion: v1
             kind: Pod
@@ -9,7 +10,7 @@ pipeline {
               restartPolicy: Never
               containers:
               - name: jenkins-agent
-                image: devsanga/jenkins-docker_new:latest  // custom Jenkins agent image
+                image: jenkins/inbound-agent:latest  // custom Jenkins agent image
                 args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
                 tty: true
                 volumeMounts:
