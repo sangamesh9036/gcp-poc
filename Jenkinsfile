@@ -15,14 +15,6 @@ pipeline {
             """
         }
     }
-    stages {
-        stage('Test') {
-            steps {
-                echo 'Testing the pod with a different image...'
-            }
-        }
-    }
-
     environment {
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'  // Docker Hub credentials
         REGISTRY_URL = 'https://index.docker.io/v1/'
@@ -31,6 +23,11 @@ pipeline {
     }
 
     stages {
+        stage('Test') {
+            steps {
+                echo 'Testing the pod with a different image...'
+            }
+        }
         stage('Clone Repository') {
             steps {
                 git url: 'https://github.com/sangamesh9036/gcp-poc.git'
