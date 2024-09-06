@@ -6,7 +6,7 @@ pipeline {
             apiVersion: v1
             kind: Pod
             spec:
-             restartPolicy: Never
+              restartPolicy: Never
               containers:
               - name: jenkins-agent
                 image: devsanga/jenkins-docker_new:latest  // custom Jenkins agent image
