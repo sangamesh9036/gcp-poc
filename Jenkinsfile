@@ -1,29 +1,15 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-agent'
-            defaultContainer 'jnlp'  // Use the default Jenkins container
+            inheritFrom 'jenkins-agent'  // Use inheritFrom instead of label
             yaml """
             apiVersion: v1
             kind: Pod
             spec:
               containers:
               - name: jnlp
-                image: jenkins/inbound-agent
-                args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
+                image: jenkins/inbound-agent:latest
                 tty: true
-                resources:
-                  requests:
-                    memory: "512Mi"
-                    cpu: "500m"
-                  limits:
-                    memory: "1024Mi"
-                    cpu: "1"
-              volumes:
-              - name: docker-socket
-                hostPath:
-                  path: /var/run/docker.sock
-                  type: File
             """
         }
     }
