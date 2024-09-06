@@ -9,7 +9,7 @@ pipeline {
             spec:
               containers:
               - name: jnlp
-                image: jenkins/inbound-agent:latest
+                image: jenkins/inbound-agent
                 args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
                 tty: true
                 resources:
