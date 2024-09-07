@@ -8,10 +8,17 @@ pipeline {
             spec:
               containers:
               - name: jenkins-agent
-                image: ubuntu  // Change the image to something like 'ubuntu' or 'busybox'
+                image: devsanga/jenkins-docker_new:latest
                 command:
                 - cat
                 tty: true
+                volumeMounts:
+                - name: docker-sock
+                  mountPath: /var/run/docker.sock
+              volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
             """
         }
     }
@@ -25,7 +32,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                echo 'Testing the pod with a different image...'
+                echo 'Testing the pod with the custom Jenkins image...'
             }
         }
         stage('Clone Repository') {
