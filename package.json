@@ -1,12 +1,12 @@
 {
-  "name": "simple-node-app",
+  "name": "sample-app",
   "version": "1.0.0",
-  "description": "A simple Node.js application for testing",
-  "main": "server.js",
+  "description": "A sample Node.js application",
+  "main": "app.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node app.js"
   },
-  "dependencies": {},
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
