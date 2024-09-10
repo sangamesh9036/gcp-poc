@@ -33,19 +33,20 @@ pipeline {
         K8S_DEPLOYMENT_FILE = "k8s-deployment.yaml"  // Assuming this is already present in the repo
     }
     stages {
-    stages {
-        stage('Install Git') {
-            steps {
-                container('docker') {
-                    script {
-                        sh '''
-                        # Install Git inside the Docker container
-                        apk add --no-cache git
-                        '''
+        stages {
+            stage('Install Git') {
+                steps {
+                    container('docker') {
+                        script {
+                            sh '''
+                            # Install Git inside the Docker container
+                            apk add --no-cache git
+                            '''
+                        }
                     }
                 }
             }
-        }        
+        }    
         stage('Clean Workspace') {
             steps {
                 container('docker') {
