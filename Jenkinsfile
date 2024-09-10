@@ -30,17 +30,14 @@ pipeline {
     }
     environment {
         DOCKER_IMAGE = "devsanga/test-image:${env.BUILD_NUMBER}"
-        K8S_DEPLOYMENT_FILE = "k8s-deployment.yaml"
+        K8S_DEPLOYMENT_FILE = "k8s-deployment.yaml"  // Assuming this is already present in the repo
     }
     stages {
-        stage('Install Git') {
+        stage('Clean Workspace') {
             steps {
                 container('docker') {
                     script {
-                        sh '''
-                        # Install Git inside the Docker container
-                        apk add --no-cache git
-                        '''
+                        deleteDir() // Clean the workspace to avoid conflicts
                     }
                 }
             }
@@ -51,10 +48,10 @@ pipeline {
                     script {
                         withCredentials([string(credentialsId: 'github-credentials', variable: 'GIT_TOKEN')]) {
                             sh '''
-                            # Mark the Jenkins workspace as a safe Git directory
+                            # Configure safe directory for Git
                             git config --global --add safe.directory /home/jenkins/agent/workspace/K8s-Deployment-Pipeline
 
-                            # Clone the Git repository using the GitHub token
+                            # Clone the GitHub repository containing the application code and k8s-deployment.yaml
                             git clone https://$GIT_TOKEN@github.com/sangamesh9036/gcp-poc.git .
                             git checkout unnecessary
                             '''
@@ -68,9 +65,6 @@ pipeline {
                 container('docker') {
                     script {
                         sh '''
-                        # Check if Docker is installed and working
-                        docker --version
-
                         # Build the Docker image using the Dockerfile from the cloned repo
                         docker build -t ${DOCKER_IMAGE} .
 
