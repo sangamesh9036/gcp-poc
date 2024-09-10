@@ -29,8 +29,7 @@ pipeline {
         }
     }
     environment {
-        DOCKER_IMAGE = "devsanga/test-image:${env.BUILD_NUMBER}"
-        K8S_DEPLOYMENT_FILE = "k8s-deployment.yaml"  // Assuming this is already present in the repo
+        DOCKER_IMAGE = "devsanga/test-image:latest"  // Using 'latest' tag for testing purposes
     }
     stages {
         stage('Install Git') {
@@ -44,7 +43,7 @@ pipeline {
                     }
                 }
             }
-        }   
+        }
         stage('Clean Workspace') {
             steps {
                 container('docker') {
@@ -63,7 +62,7 @@ pipeline {
                             # Configure safe directory for Git
                             git config --global --add safe.directory /home/jenkins/agent/workspace/K8s-Deployment-Pipeline
 
-                            # Clone the GitHub repository containing the application code and k8s-deployment.yaml
+                            # Clone the GitHub repository containing the application code
                             git clone https://$GIT_TOKEN@github.com/sangamesh9036/gcp-poc.git .
                             git checkout unnecessary
                             '''
@@ -103,24 +102,6 @@ pipeline {
                             docker logout
                             '''
                         }
-                    }
-                }
-            }
-        }
-        stage('Deploy to Kubernetes') {
-            steps {
-                container('kubectl') {
-                    script {
-                        sh '''
-                        # Update the deployment file to use the newly built Docker image
-                        sed -i 's|image: docker.io/devsanga/my-app:latest|image: ${DOCKER_IMAGE}|g' ${K8S_DEPLOYMENT_FILE}
-
-                        # Ensure the namespace exists (if not already created)
-                        kubectl create namespace my-app-namespace --dry-run=client -o yaml | kubectl apply -f -
-
-                        # Apply the updated deployment YAML to the Kubernetes cluster
-                        kubectl apply -f ${K8S_DEPLOYMENT_FILE}
-                        '''
                     }
                 }
             }
