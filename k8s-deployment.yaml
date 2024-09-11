@@ -1,114 +1,36 @@
-pipeline {
-    agent {
-        kubernetes {
-            label 'docker-agent'
-            defaultContainer 'docker'
-            yaml """
-            apiVersion: v1
-            kind: Pod
-            spec:
-              containers:
-              - name: docker
-                image: docker:20.10.24
-                command:
-                - cat
-                tty: true
-                volumeMounts:
-                - name: docker-sock
-                  mountPath: /var/run/docker.sock
-              - name: kubectl
-                image: lachlanevenson/k8s-kubectl:v1.21.0
-                command:
-                - cat
-                tty: true
-              volumes:
-              - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
-            """
-        }
-    }
-    environment {
-        DOCKER_IMAGE = "devsanga/test-image:latest"
-    }
-    stages {
-        stage('Install Git') {
-            steps {
-                container('docker') {
-                    script {
-                        sh '''
-                        # Install Git inside the Docker container
-                        apk add --no-cache git
-                        '''
-                    }
-                }
-            }
-        }
-        stage('Clean Workspace') {
-            steps {
-                container('docker') {
-                    script {
-                        deleteDir() // Clean the workspace to avoid conflicts
-                    }
-                }
-            }
-        }
-        stage('Clone Git Repository') {
-            steps {
-                container('docker') {
-                    script {
-                        withCredentials([string(credentialsId: 'github-credentials', variable: 'GIT_TOKEN')]) {
-                            sh '''
-                            git config --global --add safe.directory /home/jenkins/agent/workspace/K8s-Deployment-Pipeline
-                            git clone https://$GIT_TOKEN@github.com/sangamesh9036/gcp-poc.git .
-                            git checkout new_testing
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                container('docker') {
-                    script {
-                        sh '''
-                        docker build -t ${DOCKER_IMAGE} .
-                        docker images
-                        '''
-                    }
-                }
-            }
-        }
-        stage('Push Docker Image to Docker Hub') {
-            steps {
-                container('docker') {
-                    script {
-                        withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                            sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker push ${DOCKER_IMAGE}
-                            docker logout
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-        stage('Deploy to Kubernetes') {
-            steps {
-                container('kubectl') {
-                    script {
-                        withCredentials([file(credentialsId: 'kubeconfig-credentials', variable: 'KUBECONFIG')]) {
-                            sh '''
-                            # Use kubeconfig from credentials and apply the Kubernetes deployment
-                            kubectl apply -f k8s-deployment.yaml --namespace=my-app-namespace
-                            kubectl rollout status deployment/my-app --namespace=my-app-namespace
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  namespace: my-app-namespace 
+  labels:
+    app: my-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app-container
+        image: docker.io/devsanga/my-app:latest
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-service
+  namespace: my-app-namespace # Specify the namespace here
+spec:
+  selector:
+    app: my-app
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: LoadBalancer
