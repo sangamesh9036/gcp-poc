@@ -7,6 +7,11 @@ metadata:
     app: my-app
 spec:
   replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1   
   selector:
     matchLabels:
       app: my-app
@@ -17,7 +22,7 @@ spec:
     spec:
       containers:
       - name: my-app-container
-        image: docker.io/devsanga/test-image:latest
+        image: "docker.io/devsanga/my-app:${BUILD_ID}"
         ports:
         - containerPort: 3000
 ---
