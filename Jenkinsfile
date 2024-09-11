@@ -106,5 +106,20 @@ pipeline {
                 }
             }
         }
+        stage('Deploy to Kubernetes') {
+            steps {
+                container('kubectl') {
+                    script {
+                        sh '''
+                        # Apply the Kubernetes deployment using the k8s-deployment.yaml
+                        kubectl apply -f k8s-deployment.yaml --namespace=my-app-namespace
+
+                        # Verify the deployment
+                        kubectl rollout status deployment/my-app --namespace=my-app-namespace
+                        '''
+                    }
+                }
+            }
+        }
     }
 }
