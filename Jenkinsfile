@@ -64,7 +64,7 @@ pipeline {
 
                             # Clone the GitHub repository containing the application code
                             git clone https://$GIT_TOKEN@github.com/sangamesh9036/gcp-poc.git .
-                            git checkout unnecessary
+                            git checkout new_testing
                             '''
                         }
                     }
