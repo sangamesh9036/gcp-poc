@@ -30,7 +30,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: my-app-service
-  namespace: my-app-namespace # Specify the namespace here
+  namespace: my-app-namespace
 spec:
   selector:
     app: my-app
