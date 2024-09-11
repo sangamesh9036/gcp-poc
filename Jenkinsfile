@@ -30,7 +30,7 @@ pipeline {
         }
     }
     environment {
-        DOCKER_IMAGE = "devsanga/test-image:latest"  // Using 'latest' tag for testing purposes
+        DOCKER_IMAGE = "devsanga/test-image:${BUILD_ID}"
     }
     stages {
         stage('Install Git') {
@@ -113,7 +113,8 @@ pipeline {
                     script {
                         sh '''
                         # Apply the Kubernetes deployment using the k8s-deployment.yaml
-                        kubectl apply -f k8s-deployment.yaml --namespace=my-app-namespace
+                        #kubectl apply -f k8s-deployment.yaml --namespace=my-app-namespace
+                        kubectl set image deployment/my-app my-app-container=${DOCKER_IMAGE} --namespace=my-app-namespace
 
                         # Verify the deployment
                         kubectl rollout status deployment/my-app --namespace=my-app-namespace
