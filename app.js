@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 
 app.get('/', (req, res) => {
-    res.send('Hello World! This is a sample Node.js application.');
+    res.send('HELLO-GCP-POC.');
 });
 
 const port = process.env.PORT || 3000;
