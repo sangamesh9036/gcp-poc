@@ -48,7 +48,7 @@ pipeline {
             steps {
                 container('docker') {
                     script {
-                        deleteDir()
+                        deleteDir() // Clean the workspace to avoid conflicts
                     }
                 }
             }
@@ -59,10 +59,7 @@ pipeline {
                     script {
                         withCredentials([string(credentialsId: 'github-credentials', variable: 'GIT_TOKEN')]) {
                             sh '''
-                            # Configure safe directory for Git
                             git config --global --add safe.directory /home/jenkins/agent/workspace/K8s-Deployment-Pipeline
-
-                            # Clone the GitHub repository containing the application code
                             git clone https://$GIT_TOKEN@github.com/sangamesh9036/gcp-poc.git .
                             git checkout new_testing
                             '''
@@ -76,10 +73,7 @@ pipeline {
                 container('docker') {
                     script {
                         sh '''
-                        # Build the Docker image using the Dockerfile from the cloned repo
                         docker build -t ${DOCKER_IMAGE} .
-
-                        # List Docker images to verify the build
                         docker images
                         '''
                     }
@@ -92,13 +86,8 @@ pipeline {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                             sh '''
-                            # Log in to Docker Hub using the credentials
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-
-                            # Push the Docker image to Docker Hub
                             docker push ${DOCKER_IMAGE}
-
-                            # Log out from Docker Hub for security reasons
                             docker logout
                             '''
                         }
@@ -110,13 +99,13 @@ pipeline {
             steps {
                 container('kubectl') {
                     script {
-                        sh '''
-                        # Apply the Kubernetes deployment using the k8s-deployment.yaml
-                        kubectl apply -f k8s-deployment.yaml --namespace=my-app-namespace
-
-                        # Verify the deployment
-                        kubectl rollout status deployment/my-app --namespace=my-app-namespace
-                        '''
+                        withCredentials([file(credentialsId: 'kubeconfig-credentials', variable: 'KUBECONFIG')]) {
+                            sh '''
+                            # Use kubeconfig from credentials and apply the Kubernetes deployment
+                            kubectl apply -f k8s-deployment.yaml --namespace=my-app-namespace
+                            kubectl rollout status deployment/my-app --namespace=my-app-namespace
+                            '''
+                        }
                     }
                 }
             }
